@@ -23,17 +23,11 @@ import schedule
 import time
 import threading
 
-import os  # 引入 os 模組來讀取環境變數
+# 設定你的 LINE Bot 資訊
+LINE_ACCESS_TOKEN = "II4k+j4pZajo60UkCucc0yTCIdLdyhCJSDNdUSMzV8/eUQMTPvjh/mbZ1EdC/Pa/TTdGlu+bcXjDxZxnjD1PjQQpx0l8FrzB1+a4o6M+NcSbjs91D/XSdapbjtBZMXk+nlK98oZjN1l8a2U2Es7czQdB04t89/1O/w1cDnyilFU="
+LINE_SECRET = "d2e02c45d4047793731138001787c0b4"
+USER_ID = "Ueb034e545bea5fc77eae6f1c28b68489"
 
-# 從環境變數讀取 LINE Bot 的 API Key 和 Secret
-LINE_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
-LINE_SECRET = os.getenv("LINE_CHANNEL_SECRET")
-
-# 確保變數有成功讀取
-if not LINE_ACCESS_TOKEN or not LINE_SECRET:
-    raise ValueError("Missing LINE Bot API credentials")
-
-# 設定 Line Bot API
 line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
 
