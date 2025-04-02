@@ -1,36 +1,19 @@
+import os
+import time
+import threading
+import schedule
 from flask import Flask, request, jsonify
-
-app = Flask(__name__)
-
-reminders = []
-
-@app.route('/set_reminder', methods=['POST'])
-def set_reminder():
-    data = request.get_json()
-    task = data.get('task')
-    date = data.get('date')
-    time = data.get('time')
-    
-    if not task or not date or not time:
-        return jsonify({"error": "缺少必要參數"}), 400
-
-    reminders.append({"task": task, "date": date, "time": time})
-    return jsonify({"message": f"已設定提醒: {task}，時間: {date} {time}"})
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-import schedule
-import time
-import threading
 
-import os  # 引入 os 模組來讀取環境變數
-
-# 從環境變數讀取 LINE Bot 的 API Key 和 Secret
+# 讀取環境變數
 LINE_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_SECRET = os.getenv("LINE_CHANNEL_SECRET")
+USER_ID = os.getenv("LINE_USER_ID")
 
 # 確保變數有成功讀取
-if not LINE_ACCESS_TOKEN or not LINE_SECRET:
+if not LINE_ACCESS_TOKEN or not LINE_SECRET or not USER_ID:
     raise ValueError("Missing LINE Bot API credentials")
 
 # 設定 Line Bot API
@@ -43,7 +26,6 @@ app = Flask(__name__)
 # 儲存提醒事項
 reminders = []
 
-# 處理 LINE 訊息
 @app.route("/callback", methods=["POST"])
 def callback():
     signature = request.headers["X-Line-Signature"]
@@ -60,7 +42,6 @@ def callback():
 def handle_message(event):
     user_message = event.message.text
 
-    # 設定提醒格式：「提醒 設定時間 內容」
     if user_message.startswith("*"):
         try:
             _, time_str, task = user_message.split(" ", 2)
@@ -77,18 +58,17 @@ def handle_message(event):
         TextSendMessage(text=reply_text)
     )
 
-# 這個函式會發送提醒
 def send_reminder(task):
     line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
 
-# 啟動排程執行緒
+# 背景執行排程
 def run_scheduler():
     while True:
         schedule.run_pending()
         time.sleep(1)
 
-# 讓排程在背景執行
 threading.Thread(target=run_scheduler, daemon=True).start()
 
 if __name__ == "__main__":
-    app.run(port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
