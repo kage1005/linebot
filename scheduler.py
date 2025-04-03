@@ -31,3 +31,13 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending()
         time.sleep(60)  # 每 60 秒檢查一次
+import os
+from linebot import LineBotApi
+from linebot.models import TextSendMessage
+
+LINE_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+USER_ID = os.getenv("LINE_USER_ID")
+
+line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
+
+line_bot_api.push_message(USER_ID, TextSendMessage(text="測試訊息"))
