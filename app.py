@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
-
+# 建立 Flask 伺服器
 app = Flask(__name__)
-
-reminders = []
 
 
 @app.route('/set_reminder', methods=['POST'])
@@ -35,12 +33,8 @@ USER_ID = os.getenv("LINE_USER_ID")
 line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
 
-# 建立 Flask 伺服器
-app = Flask(__name__)
-
 # 儲存提醒事項
 reminders = []
-
 
 # 處理 LINE 訊息
 @app.route("/callback", methods=["POST"])
@@ -85,8 +79,10 @@ def handle_message(event):
 
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=reply_text),
-        TextSendMessage(text=USER_ID)
+        [
+            TextSendMessage(text=reply_text),
+            TextSendMessage(text=f"你的 User ID 是：{USER_ID}")
+        ]
     )
 
 # 啟動排程執行緒
