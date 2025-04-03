@@ -23,7 +23,7 @@ def send_reminder(task):
         print("✅ 發送成功！")
     except Exception as e:
         print(f"🚨 發送失敗：{e}")  # ← 如果這裡有錯誤，請貼給我看
-
+send_reminder("測試提醒")
 
 # 設定 Line Bot API
 line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
