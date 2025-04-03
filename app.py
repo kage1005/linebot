@@ -25,6 +25,7 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import schedule
 import time
 import threading
+import os
 
 # 設定你的 LINE Bot 資訊
 LINE_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
