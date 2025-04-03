@@ -2,15 +2,23 @@ import os
 import time
 import threading
 import schedule
-from flask import Flask, request, jsonify
-from linebot import LineBotApi, WebhookHandler
+from flask import Flask, request
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-
+from linebot import LineBotApi, WebhookHandler
+import os
 # 讀取環境變數
 LINE_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_SECRET = os.getenv("LINE_CHANNEL_SECRET")
 USER_ID = os.getenv("LINE_USER_ID")
+
+if not LINE_ACCESS_TOKEN or not LINE_SECRET:
+    raise ValueError("Missing LINE Bot API credentials")
+
+# 設定 Line Bot API
+line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_SECRET)
+
 
 # 確保變數有成功讀取
 if not LINE_ACCESS_TOKEN or not LINE_SECRET or not USER_ID:
@@ -99,3 +107,6 @@ def run_scheduler():
 
 # 讓排程在背景執行
 threading.Thread(target=run_scheduler, daemon=True).start()
+
+print(f"LINE_ACCESS_TOKEN: {LINE_ACCESS_TOKEN}")
+print(f"LINE_SECRET: {LINE_SECRET}")
