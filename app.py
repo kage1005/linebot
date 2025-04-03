@@ -55,6 +55,9 @@ def callback():
 
     return "OK", 200
 
+# 這個函式會發送提醒
+def send_reminder(task):
+    line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
 
 import datetime
 
@@ -78,16 +81,13 @@ def handle_message(event):
     # 取得目前伺服器時間並格式化
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     reply_text += f"\n目前伺服器時間：{current_time}"
+    # 回報LINE ID
 
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=reply_text)
+        TextSendMessage(text=reply_text),
+        TextSendMessage(text=USER_ID)
     )
-
-# 這個函式會發送提醒
-def send_reminder(task):
-    line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
-
 
 # 啟動排程執行緒
 def run_scheduler():
