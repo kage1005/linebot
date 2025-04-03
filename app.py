@@ -16,6 +16,15 @@ USER_ID = os.getenv("LINE_USER_ID")
 if not LINE_ACCESS_TOKEN or not LINE_SECRET or not USER_ID:
     raise ValueError("Missing LINE Bot API credentials")
 
+def send_reminder(task):
+    try:
+        print(f"📢 發送提醒：{task}")
+        line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
+        print("✅ 發送成功！")
+    except Exception as e:
+        print(f"🚨 發送失敗：{e}")  # ← 如果這裡有錯誤，請貼給我看
+
+
 # 設定 Line Bot API
 line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
