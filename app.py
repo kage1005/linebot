@@ -56,27 +56,33 @@ def callback():
     return "OK", 200
 
 
+import datetime
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_message = event.message.text
+    user_message = event.message.text.strip()
 
-    # 設定提醒格式：「提醒 設定時間 內容」
     if user_message.startswith("*"):
         try:
+            # 分割訊息，格式為：*時間 提醒內容
             _, time_str, task = user_message.split(" ", 2)
             reminders.append((time_str, task))
             schedule.every().day.at(time_str).do(send_reminder, task)
             reply_text = f"✅ 已設定提醒：{task}（時間：{time_str}）"
-        except:
+        except Exception as e:
+            print(f"Error setting reminder: {e}")
             reply_text = "⚠️ 設定提醒格式錯誤！請使用「*12:30 吃午餐」"
     else:
         reply_text = "💡 你可以輸入「*12:30 吃午餐」來設定提醒喔！"
+
+    # 取得目前伺服器時間並格式化
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    reply_text += f"\n目前伺服器時間：{current_time}"
 
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=reply_text)
     )
-
 
 # 這個函式會發送提醒
 def send_reminder(task):
