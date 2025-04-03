@@ -31,11 +31,7 @@ def send_reminder(task):
         print("✅ 發送成功！")
     except Exception as e:
         print(f"🚨 發送失敗：{e}")  # ← 如果這裡有錯誤，請貼給我看
-send_reminder("測試提醒")
 
-# 設定 Line Bot API
-line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
-handler = WebhookHandler(LINE_SECRET)
 
 # 建立 Flask 伺服器
 app = Flask(__name__)
@@ -92,11 +88,6 @@ if __name__ == "__main__":
 import schedule
 import time
 import threading
-
-# 這個函式會發送提醒
-def send_reminder(task):
-    print(f"發送提醒中：{task}")  # ← 這裡加上 debug 訊息
-    line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
 
 # 啟動排程執行緒
 def run_scheduler():
