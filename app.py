@@ -72,3 +72,21 @@ threading.Thread(target=run_scheduler, daemon=True).start()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+import schedule
+import time
+import threading
+
+# 這個函式會發送提醒
+def send_reminder(task):
+    print(f"發送提醒中：{task}")  # ← 這裡加上 debug 訊息
+    line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
+
+# 啟動排程執行緒
+def run_scheduler():
+    while True:
+        print("🔄 定時排程執行中...")  # ← 這裡加上 debug 訊息
+        schedule.run_pending()
+        time.sleep(1)
+
+# 讓排程在背景執行
+threading.Thread(target=run_scheduler, daemon=True).start()
