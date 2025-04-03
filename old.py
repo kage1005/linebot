@@ -26,7 +26,7 @@ import threading
 # 設定你的 LINE Bot 資訊
 LINE_ACCESS_TOKEN = "II4k+j4pZajo60UkCucc0yTCIdLdyhCJSDNdUSMzV8/eUQMTPvjh/mbZ1EdC/Pa/TTdGlu+bcXjDxZxnjD1PjQQpx0l8FrzB1+a4o6M+NcSbjs91D/XSdapbjtBZMXk+nlK98oZjN1l8a2U2Es7czQdB04t89/1O/w1cDnyilFU="
 LINE_SECRET = "d2e02c45d4047793731138001787c0b4"
-USER_ID = "Ueb034e545bea5fc77eae6f1c28b68489"
+LINE_USER_ID = "Ueb034e545bea5fc77eae6f1c28b68489"
 
 line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_SECRET)

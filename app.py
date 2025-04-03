@@ -1,33 +1,47 @@
-import os
-import time
-import threading
-import schedule
-from flask import Flask, request
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+reminders = []
+
+
+@app.route('/set_reminder', methods=['POST'])
+def set_reminder():
+    data = request.get_json()
+    task = data.get('task')
+    date = data.get('date')
+    time = data.get('time')
+
+    if not task or not date or not time:
+        return jsonify({"error": "缺少必要參數"}), 400
+
+    reminders.append({"task": task, "date": date, "time": time})
+    return jsonify({"message": f"已設定提醒: {task}，時間: {date} {time}"})
+
+
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import schedule
+import time
+import threading
 
-# 讀取環境變數
+# 設定你的 LINE Bot 資訊
 LINE_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_SECRET = os.getenv("LINE_CHANNEL_SECRET")
 USER_ID = os.getenv("LINE_USER_ID")
 
-if not LINE_ACCESS_TOKEN or not LINE_SECRET or not USER_ID:
-    raise ValueError("Missing LINE Bot API credentials")
-
-print(f"LINE_ACCESS_TOKEN: {LINE_ACCESS_TOKEN}")
-print(f"LINE_SECRET: {LINE_SECRET}")
-
-# 設定 LINE Bot API
 line_bot_api = LineBotApi(LINE_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_SECRET)
 
-# 建立 Flask 應用程式
+# 建立 Flask 伺服器
 app = Flask(__name__)
 
-# 儲存提醒事項（避免重複設定）
+# 儲存提醒事項
 reminders = []
 
+
+# 處理 LINE 訊息
 @app.route("/callback", methods=["POST"])
 def callback():
     signature = request.headers["X-Line-Signature"]
@@ -40,21 +54,19 @@ def callback():
 
     return "OK", 200
 
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_message = event.message.text.strip()
+    user_message = event.message.text
 
+    # 設定提醒格式：「提醒 設定時間 內容」
     if user_message.startswith("*"):
         try:
-            # 分割訊息，格式為：*時間 提醒內容
             _, time_str, task = user_message.split(" ", 2)
-            # 將提醒存入清單，避免重複設定（可依需求做擴充）
             reminders.append((time_str, task))
-            # 設定每天於指定時間發送提醒
             schedule.every().day.at(time_str).do(send_reminder, task)
             reply_text = f"✅ 已設定提醒：{task}（時間：{time_str}）"
-        except Exception as e:
-            print(f"Error in handle_message: {e}")
+        except:
             reply_text = "⚠️ 設定提醒格式錯誤！請使用「*12:30 吃午餐」"
     else:
         reply_text = "💡 你可以輸入「*12:30 吃午餐」來設定提醒喔！"
@@ -64,23 +76,21 @@ def handle_message(event):
         TextSendMessage(text=reply_text)
     )
 
-def send_reminder(task):
-    try:
-        print(f"📢 發送提醒：{task}")
-        line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
-        print("✅ 發送成功！")
-    except Exception as e:
-        print(f"🚨 發送失敗：{e}")
 
+# 這個函式會發送提醒
+def send_reminder(task):
+    line_bot_api.push_message(USER_ID, TextSendMessage(text=f"⏰ 記得哦！{task}"))
+
+
+# 啟動排程執行緒
 def run_scheduler():
     while True:
-        print("🔄 定時排程執行中...")
         schedule.run_pending()
         time.sleep(1)
 
-# 啟動排程背景執行緒
+
+# 讓排程在背景執行
 threading.Thread(target=run_scheduler, daemon=True).start()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(port=5000)
